@@ -1,0 +1,30 @@
+node_modules/
+dist/
+build/
+www/version.json.tmp
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/
+*.apk
+*.aab
+*.zip
+!update-*.zip
+pin.txt
+.cloud-url
+.DS_Store
+
+# iOS local build/signing output
+ios/App/build/
+ios/DerivedData/
+*.xcarchive/
+*.ipa
+**/xcuserdata/
+
+# Generated static PWA and hosting account metadata
+dist/web/
+.netlify/
+.vercel/
+
+Downloads/

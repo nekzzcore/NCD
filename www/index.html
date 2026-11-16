@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ru" data-style-state="loading">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="NCD — автономная система управления целями: цели, календарь, финансы и здоровье. Работает офлайн, устанавливается как нативное приложение.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NCD">
+    <link rel="manifest" href="manifest.json">
+    <script id="theme-before-paint">
+        (() => {
+            let preference = 'dark';
+            try { preference = localStorage.getItem('theme') || 'dark'; } catch {}
+            const light = preference === 'light' || preference === 'auto' && !window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = light ? 'light' : 'dark';
+            document.documentElement.style.colorScheme = light ? 'light' : 'dark';
+        })();
+    </script>
+    <style id="critical-ui">
+        /* Keep inactive overlays hidden even if the external CSS cannot load. */
+        :root { --bg-primary:#020617; --bg-secondary:#0f172a; --text-main:#fff; --text-muted:#94a3b8; --border:#1e293b; --accent:#4f46e5; color-scheme:dark; }
+        html[data-theme="light"] { --bg-primary:#e9edf2; --bg-secondary:#f2f4f7; --text-main:#263347; --text-muted:#56677e; --border:#cbd4e0; color-scheme:light; }
+        html,body { margin:0; background:var(--bg-primary); color:var(--text-main); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+        html:not([data-style-state="ready"]) #app { visibility:hidden; }
+        #styleLoadError { display:none; position:fixed; inset:0; z-index:100001; padding:32px; background:#020617; color:#fff; font:16px/1.6 system-ui; }
+        html[data-style-state="error"] #styleLoadError { display:block; }
+        .modal:not(.active), .view:not(.active), dialog:not([open]) { display:none!important; }
+        #native-splash .splash-star-logo {
+            width: 112px; height: 112px; color: var(--text-main);
+            animation: nativeSplashPulse 2s ease-in-out infinite;
+        }
+        #native-splash .splash-star-logo svg { display: block; width: 100%; height: 100%; }
+        @keyframes nativeSplashPulse {
+            0%, 100% { transform: scale(.92); opacity: .65; filter: drop-shadow(0 0 8px #ffffff66); }
+            50% { transform: scale(1.06); opacity: 1; filter: drop-shadow(0 0 24px #ffffffcc); }
+        }
+    </style>
+    <link id="ncd-main-styles" rel="stylesheet" href="./styles.css?v=e4a8a929777c" onload="document.documentElement.dataset.styleState='ready'" onerror="document.documentElement.dataset.styleState='error'">
+    <link rel="icon" type="image/svg+xml" sizes="any" href="icon.svg?v=compass-1">
+    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=compass-1">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=compass-1">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=compass-1">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=compass-1">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png?v=compass-1">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png?v=compass-1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=compass-1">
+    <title>NCD</title>
+    <!-- Import map: резолвит bare-спецификатор "three" внутри аддонов (OrbitControls/GLTFLoader).
+         Локальный вендор three@0.186 — работает офлайн, одна версия для core и addons. -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "./vendor/three/three.module.js",
+            "three/addons/": "./vendor/three/addons/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="native-splash" role="status" aria-label="Загрузка NCD" style="position: fixed; inset: 0; background: var(--bg-primary); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease;">
+        <div class="splash-star-logo"><svg aria-hidden="true" focusable="false" viewBox="0 0 100 100">
+
+  <g id="mark" stroke="currentColor" stroke-width="0.8" stroke-linejoin="miter">
+    <g>
+      <path d="M77 23 62 44 56 44Z" fill="currentColor"/>
+      <path d="M77 23 56 38 56 44Z" fill="none"/>
+    </g>
+    <g transform="rotate(90 50 50)">
+      <path d="M77 23 62 44 56 44Z" fill="currentColor"/>
+      <path d="M77 23 56 38 56 44Z" fill="none"/>
+    </g>
+    <g transform="rotate(180 50 50)">
+      <path d="M77 23 62 44 56 44Z" fill="currentColor"/>
+      <path d="M77 23 56 38 56 44Z" fill="none"/>
+    </g>
+    <g transform="rotate(270 50 50)">
+      <path d="M77 23 62 44 56 44Z" fill="currentColor"/>
+      <path d="M77 23 56 38 56 44Z" fill="none"/>
+    </g>
+    <g>
+      <path d="M50 2 56 44 50 50Z" fill="currentColor"/>
+      <path d="M50 2 44 44 50 50Z" fill="none"/>
+    </g>
+    <g transform="rotate(90 50 50)">
+      <path d="M50 2 56 44 50 50Z" fill="currentColor"/>
+      <path d="M50 2 44 44 50 50Z" fill="none"/>
+    </g>
+    <g transform="rotate(180 50 50)">
+      <path d="M50 2 56 44 50 50Z" fill="currentColor"/>
+      <path d="M50 2 44 44 50 50Z" fill="none"/>
+    </g>
+    <g transform="rotate(270 50 50)">
+      <path d="M50 2 56 44 50 50Z" fill="currentColor"/>
+      <path d="M50 2 44 44 50 50Z" fill="none"/>
+    </g>
+  </g>
+</svg></div>
+        <div style="color: var(--text-secondary); font-family: sans-serif; letter-spacing: 4px; margin-top: 20px;">NOTE CARPE DIEM</div>
+    </div>
+    <script id="native-splash-timer">
+        // This timer alone owns dismissal, independently of app/data initialization.
+        (() => {
+            const splash = document.getElementById('native-splash');
+            setTimeout(() => {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; }, 800);
+            }, 4000);
+        })();
+    </script>
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-screen" style="display:none;">
+        <div class="auth-card">
+            <div class="auth-logo" aria-hidden="true"><svg class="ncd-compass" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="assets/ncd-compass.svg#mark"></use></svg></div>
+            <h1 class="auth-title">NCD</h1>
+            <p class="auth-subtitle">Создайте локальный профиль один раз. Он хранится только на этом устройстве.</p>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="authNickname">Никнейм *</label>
+                    <input id="authNickname" required placeholder="Ваш никнейм" minlength="2" maxlength="30" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">
+                </div>
+                <div class="form-group">
+                    <label for="authAvatar">Аватар</label>
+                    <div class="avatar-selector" id="avatarSelector">
+                        <button type="button" class="avatar-option active" data-avatar="😊">😊</button>
+                        <button type="button" class="avatar-option" data-avatar="😎">😎</button>
+                        <button type="button" class="avatar-option" data-avatar="🧑‍💻">🧑‍💻</button>
+                        <button type="button" class="avatar-option" data-avatar="🦸">🦸</button>
+                        <button type="button" class="avatar-option" data-avatar="🐱">🐱</button>
+                        <button type="button" class="avatar-option" data-avatar="🐺">🐺</button>
+                        <button type="button" class="avatar-option" data-avatar="🦊">🦊</button>
+                        <button type="button" class="avatar-option" data-avatar="🐉">🐉</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Создать профиль</button>
+            </form>
+                <button type="button" class="btn btn-secondary" id="openCloudProfileBtn">Перейти к облачному входу</button>
+        </div>
+    </div>
+
+    <div id="app" style="display:none;">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="ncd-sidebar-brand"><svg class="ncd-compass" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="assets/ncd-compass.svg#mark"></use></svg><span class="ncd-wordmark"><span class="ncd-name">NCD</span></span></span>
+                <button class="btn-icon" id="toggleSidebar" title="Свернуть">☰</button>
+            </div>
+            <div class="sidebar-nav" aria-label="Разделы рабочего пространства">
+                <button class="nav-item active" data-view="goals" title="Цели">
+                    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span>
+                    <span class="nav-text">Цели</span>
+                </button>
+                <button class="nav-item" data-view="calendar" title="Календарь">
+                    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4m8-4v4"/></svg></span>
+                    <span class="nav-text">Календарь</span>
+                </button>
+                <button class="nav-item" data-view="learning" title="Обучение"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16M12 5C9 3 5 3 2 4v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1Z"/></svg></span><span class="nav-text">Обучение</span></button>
+                <button class="nav-item" data-view="case" title="Case"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11H3Z"/></svg></span><span class="nav-text">Case</span></button>
+                <button class="nav-item" data-view="finance" title="Финансы">
+                    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18m-5 5h2"/></svg></span>
+                    <span class="nav-text">Финансы</span>
+                </button>
+                <button class="nav-item" data-view="health" title="Здоровье">
+                    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5c-3-3-6-1-8 1-2-2-5-4-8-1-4 4 1 9 8 15 7-6 12-11 8-15Z"/></svg></span>
+                    <span class="nav-text">Здоровье</span>
+                </button>
+                <button class="nav-item" data-view="achievements" title="Достижения">
+                    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v6a4 4 0 0 1-8 0Zm0 2H4v3a4 4 0 0 0 4 4m8-7h4v3a4 4 0 0 1-4 4m-4 1v7m-4 0h8"/></svg></span>
+                    <span class="nav-text">Достижения</span>
+                </button>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-icon" id="settingsBtn" title="Настройки">⚙️</button>
+                <button class="btn-icon" id="themeBtn" title="Тема">🌙</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <header class="mobile-app-header">
+                <span class="ncd-brand ncd-header-brand"><svg class="ncd-compass" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="assets/ncd-compass.svg#mark"></use></svg><span class="ncd-wordmark"><span class="ncd-name">NCD</span><span class="ncd-tagline">Note Carpe Diem</span></span></span>
+                <div class="mobile-header-actions" aria-label="Быстрые настройки">
+                    <button class="btn-icon" id="mobileSettingsBtn" type="button" title="Настройки" aria-label="Открыть настройки">⚙️</button>
+                    <button class="btn-icon" id="mobileThemeBtn" type="button" title="Переключить тему" aria-label="Переключить тёмную или светлую тему">🌙</button>
+                </div>
+            </header>
+            <!-- Dashboard View -->
+            <div class="view" id="view-dashboard">
+                <div class="view-header">
+                    <h2 id="dashboardGreeting">Дашборд</h2>
+                    <button class="btn btn-primary" id="addGoalBtn">+ Новая цель</button>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card stat-card">
+                        <div class="stat-value" id="totalGoals">0</div>
+                        <div class="stat-label">Всего целей</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" id="activeGoals">0</div>
+                        <div class="stat-label">Активных</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" id="completedGoals">0</div>
+                        <div class="stat-label">Завершённых</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" id="overallProgress">0%</div>
+                        <div class="stat-label">Общий прогресс</div>
+                    </div>
+                </div>
+                <div class="dashboard-widgets">
+                    <div class="card widget" id="productivityWidget"></div>
+                    <div class="card widget" id="goalHealthWidget"></div>
+                </div>
+                <div class="card">
+                    <h3>Последние достижения</h3>
+                    <div id="recentAchievements" class="achievements-list"></div>
+                </div>
+                <div class="card">
+                    <h3>Цели с дедлайном</h3>
+                    <div id="upcomingDeadlines" class="deadlines-list"></div>
+                </div>
+            </div>
+
+            <!-- Goals View -->
+            <div class="view active" id="view-goals">
+                <div class="view-header">
+                    <h2>Цели</h2>
+                    <div class="header-actions">
+                        <select id="filterStatus" class="select" aria-label="Показать цели">
+                            <option value="all">Все активные цели</option>
+                            <option value="active">Активные</option>
+                            <option value="completed">Завершённые</option>
+                        </select>
+                        <select id="sortBy" class="select" aria-label="Сортировка целей">
+                            <option value="priority" selected>По приоритету</option>
+                            <option value="created">По дате</option>
+                            <option value="deadline">По дедлайну</option>
+                            <option value="progress">По прогрессу</option>
+                            <option value="name">По названию</option>
+                        </select>
+                        <button class="btn btn-primary" id="addGoalBtn2">+ Новая цель</button>
+                    </div>
+                </div>
+                <div id="goalsList" class="goals-list"></div>
+            </div>
+
+            <div class="view" id="view-case"><div class="view-header"><h2>Case</h2></div><div id="caseMain"></div></div>
+            <div class="view" id="view-learning"><div class="view-header"><h2>Обучение</h2></div><div id="learningMain"></div></div>
+
+            <!-- Achievements View -->
+            <div class="view" id="view-achievements">
+                <div class="view-header">
+                    <h2>Достижения</h2>
+                    <button class="btn btn-primary" id="addAchievementBtn">+ Добавить</button>
+                </div>
+                <div class="achievement-tabs" role="group" aria-label="Завершённые цели">
+                    <button type="button" class="btn" data-achievement-tab="achievements" aria-pressed="true">🏆 Достижения</button>
+                    <button type="button" class="btn" data-achievement-tab="archive" aria-pressed="false">📦 Архив</button>
+                </div>
+                <div id="achievementsList" class="achievements-full-list"></div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="view" id="view-calendar">
+                <div class="view-header">
+                    <h2>Календарь</h2>
+                    <div class="calendar-nav">
+                        <button class="btn-icon" id="prevMonth">◀</button>
+                        <span id="currentMonth">Октябрь 2026</span>
+                        <button class="btn-icon" id="nextMonth">▶</button>
+                        <button type="button" class="btn btn-secondary" id="allCalendarActivitiesBtn">Все активности</button>
+                    </div>
+                </div>
+                <div class="calendar-layout">
+                    <div class="card calendar-grid-card"><div id="calendarGrid" class="calendar-grid"></div></div>
+                    <aside class="card calendar-agenda" aria-labelledby="calendarAgendaTitle">
+                        <h3 id="calendarAgendaTitle">Расписание</h3>
+                        <p id="calendarSelectedDate" class="calendar-selected-date" aria-live="polite"></p>
+                        <div id="calendarDayEvents"></div>
+                        <button type="button" class="btn btn-primary" id="addCalendarNoteBtn">+ Добавить запись</button>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- Finance View -->
+            <div class="view" id="view-finance">
+                <div class="view-header">
+                    <h2>Финансы</h2>
+                </div>
+                <div id="financeMain"></div>
+            </div>
+
+            <!-- Health View -->
+            <div class="view" id="view-health">
+                <div class="view-header health-view-header">
+                    <div>
+                        <h2>Здоровье</h2>
+                        <p class="health-subtitle">Показатели из Android Health Connect</p>
+                    </div>
+                </div>
+                
+                <!-- Three.js 3D сцена персонажа -->
+                <section class="card health-3d-card" aria-labelledby="bodyScanTitle">
+                    <div id="health3DCanvasContainer" style="width: 100%; position: relative; background: #0a0a1a; border-radius: 12px; overflow: hidden;">
+                        <div class="health-3d-loader" id="health3DLoader" role="status" aria-live="polite">
+                            <span class="health-3d-spinner" aria-hidden="true"></span>
+                            <span id="health3DLoaderText">Скан загружается...</span>
+                            <progress id="health3DProgress" class="health-3d-progress" max="100" aria-label="Загрузка 3D-модели"></progress>
+                        </div>
+                        <!-- Three.js 3D сцена будет здесь -->
+                    </div>
+                    <div class="avatar-info">
+                        <h3 class="cyber-text" id="bodyScanTitle">Модель тела</h3>
+                        <p class="status-active" id="bodyScanStatus" role="status">Статус: скан ожидает открытия</p>
+                    </div>
+                </section>
+
+                <div class="health-layout">
+                    <section class="card health-connect-card" aria-labelledby="healthConnectTitle">
+                        <div class="health-card-heading">
+                            <div>
+                                <h3 id="healthConnectTitle">Health Connect</h3>
+                                <p id="healthStatus" class="health-status" role="status">Проверяем доступность…</p>
+                            </div>
+                            <span class="health-local-badge">Синхронизация аккаунта</span>
+                        </div>
+                        <p class="health-privacy-note">NCD читает шаги, пульс, сон и вес через Health Connect. Последние показатели сохраняются в вашем аккаунте и доступны на других устройствах. Разрешения на чтение выдаются отдельно на каждом телефоне.</p>
+                        <div class="health-actions">
+                            <button class="btn btn-primary" id="healthConnectBtn" type="button">Подключить Health Connect</button>
+                            <button class="btn btn-secondary" id="healthSyncBtn" type="button" disabled>Синхронизировать</button>
+                        </div>
+                        <p class="health-last-sync" id="healthLastSync">Последнее успешное чтение: —</p>
+                    </section>
+                </div>
+
+                <section class="card health-metrics-card" aria-labelledby="healthMetricsTitle">
+                    <div class="health-card-heading">
+                        <h3 id="healthMetricsTitle">Последние показатели</h3>
+                    </div>
+                    <div class="health-metrics" id="healthMetrics">
+                        <div class="health-metric" data-health-metric="steps"><span class="health-metric-icon">👟</span><div><span class="health-metric-label">Шаги сегодня</span><strong class="health-metric-value">—</strong><small class="health-metric-source">Источник: —</small></div></div>
+                        <div class="health-metric" data-health-metric="heartRate"><span class="health-metric-icon">♥</span><div><span class="health-metric-label">Пульс</span><strong class="health-metric-value">—</strong><small class="health-metric-source">Источник: —</small></div></div>
+                        <div class="health-metric" data-health-metric="sleep"><span class="health-metric-icon">☾</span><div><span class="health-metric-label">Последний сон</span><strong class="health-metric-value">—</strong><small class="health-metric-source">Источник: —</small></div></div>
+                        <div class="health-metric" data-health-metric="weight"><span class="health-metric-icon">⚖</span><div><span class="health-metric-label">Вес</span><strong class="health-metric-value">—</strong><small class="health-metric-source">Источник: —</small></div></div>
+                    </div>
+                    <p class="health-data-note">Наличие браслета или Mi Fitness не гарантирует передачу каждого показателя в Health Connect.</p>
+                </section>
+            </div>
+        </main>
+
+        <aside class="info-panel" id="infoPanel" aria-label="Контекстная информация">
+            <button type="button" id="goalDetailBackdrop" class="goal-detail-backdrop" tabindex="-1" aria-label="Закрыть детали цели"></button>
+            <div class="inspector-panel-label">ДЕТАЛИ</div>
+            <div class="inspector-overview" id="inspectorOverview"></div>
+    <div class="inspector-detail" id="goalDetailModal" role="region" aria-labelledby="detailGoalTitle">
+        <div class="inspector-content">
+            <div class="modal-header">
+                <h3 id="detailGoalTitle">Детали цели</h3>
+                <button type="button" class="btn-icon goal-delete-action" id="deleteGoalHeaderBtn" aria-label="Удалить цель" title="Удалить цель">🗑️</button>
+                <button class="btn-icon" id="closeDetailModal">✕</button>
+            </div>
+            <div id="goalDetailContent" class="goal-detail-content"></div>
+        </div>
+    </div>
+
+        </aside>
+
+        <div class="modal" id="deleteGoalModal" role="dialog" aria-modal="true" aria-labelledby="deleteGoalTitle" aria-describedby="deleteGoalMessage">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header"><h3 id="deleteGoalTitle">Удалить цель</h3></div>
+                <p id="deleteGoalMessage"></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelDeleteGoalBtn">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteGoalBtn">Удалить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile navigation -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="bottom-nav-item active" data-view="goals" title="Цели">
+                <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span>
+                <span class="nav-text">Цели</span>
+            </button>
+            <button class="bottom-nav-item" data-view="calendar" title="Календарь">
+                <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4m8-4v4"/></svg></span>
+                <span class="nav-text">Календарь</span>
+            </button>
+            <button class="bottom-nav-item" data-view="finance" title="Финансы">
+                <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18m-5 5h2"/></svg></span>
+                <span class="nav-text">Финансы</span>
+            </button>
+            <button class="bottom-nav-item" data-view="health" title="Здоровье">
+                <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5c-3-3-6-1-8 1-2-2-5-4-8-1-4 4 1 9 8 15 7-6 12-11 8-15Z"/></svg></span>
+                <span class="nav-text">Здоровье</span>
+            </button>
+            <button class="bottom-nav-item" data-view="achievements" title="Достижения">
+                <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v6a4 4 0 0 1-8 0Zm0 2H4v3a4 4 0 0 0 4 4m8-7h4v3a4 4 0 0 1-4 4m-4 1v7m-4 0h8"/></svg></span>
+                <span class="nav-text">Достижения</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modal: Add/Edit Goal -->
+    <template data-modal-view="goalModal">
+    <div class="modal" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="goalModalTitle">Новая цель</h3>
+                <button class="btn-icon" id="closeGoalModal">✕</button>
+            </div>
+            <form id="goalForm">
+                <p id="goalParentContext" class="goal-parent-context" hidden></p>
+                <p id="goalFormError" class="goal-form-error" role="alert" hidden></p>
+                <input type="hidden" id="goalId">
+                <div class="form-group">
+                    <label for="goalTitle">Название *</label>
+                    <input type="text" id="goalTitle" required placeholder="Например: Выучить английский">
+                </div>
+                <div class="form-group">
+                    <label for="goalDescription">Описание</label>
+                    <textarea id="goalDescription" placeholder="Подробное описание..."></textarea>
+                </div>
+                <input type="hidden" id="goalSubgoalKind" value="checkbox">
+                <input type="hidden" id="goalSubgoalPeriod" value="week">
+                <div class="form-group subgoal-kind-group" id="subgoalKindGroup" hidden>
+                    <label>Тип подцели</label>
+                    <div class="subgoal-kind-picker" role="radiogroup" aria-label="Тип подцели">
+                        <button type="button" class="subgoal-kind-option is-active" data-subgoal-kind="checkbox" role="radio" aria-checked="true">
+                            <span>Чекбокс</span>
+                            <small>Разовый шаг</small>
+                        </button>
+                        <button type="button" class="subgoal-kind-option" data-subgoal-kind="rhythm" role="radio" aria-checked="false">
+                            <span>Ритм</span>
+                            <small>Серия дней</small>
+                        </button>
+                        <button type="button" class="subgoal-kind-option" data-subgoal-kind="balance" role="radio" aria-checked="false">
+                            <span>Баланс / Сумма</span>
+                            <small>Числовой прогресс</small>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group subgoal-rhythm-fields" id="subgoalRhythmFields" hidden>
+                    <label>Период ритма</label>
+                    <div class="subgoal-period-picker" role="radiogroup" aria-label="Период ритма">
+                        <button type="button" class="subgoal-period-option is-active" data-subgoal-period="week" role="radio" aria-checked="true">Неделя</button>
+                        <button type="button" class="subgoal-period-option" data-subgoal-period="month" role="radio" aria-checked="false">Месяц</button>
+                    </div>
+                    <p class="form-hint">День начинается в 06:00. Отмечайте сегодняшний квадрат — пропущенные дни остаются тёмными.</p>
+                </div>
+                <div class="form-group">
+                    <label for="goalPriority">Приоритет</label>
+                    <select id="goalPriority">
+                        <option value="low">Низкий</option>
+                        <option value="medium" selected>Средний</option>
+                        <option value="high">Высокий</option>
+                        <option value="milestone">★ Главная веха</option>
+                    </select>
+                </div>
+                <label class="module-check goal-milestone-toggle"><input type="checkbox" id="goalMilestone">★ Главная веха</label>
+                <div class="form-group goal-attachment-fields" id="goalAttachmentFields" hidden>
+                    <label>Прикреплённые файлы</label>
+                    <button type="button" class="btn btn-secondary" id="goalAddAttachment">📎 Добавить файл / фото</button>
+                    <input type="file" id="goalAttachmentInput" accept="image/*,.pdf,.doc,.docx,.txt" multiple hidden>
+                    <div id="goalAttachmentList" class="goal-attachment-list" aria-live="polite"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelGoalBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </template>
+
+    <!-- Modal: Goal Details -->
+    <!-- Modal: Add Achievement -->
+    <template data-modal-view="achievementModal">
+    <div class="modal" id="achievementModal" role="dialog" aria-modal="true" aria-labelledby="achievementModalTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="achievementModalTitle">Новое достижение</h3>
+                <button class="btn-icon" id="closeAchievementModal">✕</button>
+            </div>
+            <form id="achievementForm">
+                <input type="hidden" id="achievementId">
+                <div class="form-group">
+                    <label for="achievementGoal">Цель *</label>
+                    <select id="achievementGoal" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="achievementTitle">Название *</label>
+                    <input type="text" id="achievementTitle" required placeholder="Например: Сдал экзамен">
+                </div>
+                <div class="form-group">
+                    <label for="achievementDescription">Описание</label>
+                    <textarea id="achievementDescription" placeholder="Что сделано..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="achievementDate">Дата</label>
+                        <input type="date" id="achievementDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="achievementProgress">Прогресс (%)</label>
+                        <input type="number" id="achievementProgress" min="0" max="100" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="toggle">
+                        <input type="checkbox" id="achievementProtected">
+                        <span class="toggle-slider"></span>
+                        <span>Защищённое (нельзя удалить)</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAchievementBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </template>
+
+    <!-- Modal: Calendar Note -->
+    <template data-modal-view="noteModal">
+    <div class="modal" id="noteModal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="noteModalTitle">Заметка</h3>
+                <button class="btn-icon" id="closeNoteModal">✕</button>
+            </div>
+            <form id="noteForm">
+                <input type="hidden" id="noteDate">
+                <input type="hidden" id="noteId">
+                <div class="note-date-label" id="noteDateLabel"></div>
+                <div class="form-row">
+                    <div class="form-group note-text-group">
+                        <label for="noteContent">Текст встречи / заметки *</label>
+                        <input type="text" id="noteContent" required placeholder="Например: Встреча с командой" maxlength="200" autocomplete="off">
+                    </div>
+                    <div class="form-group note-time-group">
+                        <label for="noteTime">Время</label>
+                        <input type="time" id="noteTime">
+                    </div>
+                </div>
+                <p class="note-hint">В один день можно добавить несколько записей — они выстроятся по времени.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" id="deleteNoteBtn" style="display:none;">Удалить</button>
+                    <button type="button" class="btn btn-secondary" id="cancelNoteBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </template>
+
+    <!-- Modal: Settings -->
+    <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="settingsModalTitle">Настройки</h3>
+                <button class="btn-icon" id="closeSettingsModal">✕</button>
+            </div>
+            <div class="settings-content">
+                <div id="settingsUserCard"></div>
+                <section class="cloud-sync-panel settings-cloud" id="cloudSyncPanel" aria-labelledby="cloudSyncTitle">
+                    <h4 id="cloudSyncTitle">Облачная синхронизация</h4>
+                    <p data-cloud-session-state role="status" hidden></p>
+                    <p data-cloud-account hidden></p>
+                    <p data-cloud-status role="status" aria-live="polite">Вход не выполнен</p>
+                    <p data-cloud-sync-status role="status" aria-live="polite" hidden></p>
+                    <small data-cloud-diagnostic hidden></small>
+                    <p><small data-cloud-build></small></p>
+                    <button type="button" class="btn btn-primary" data-cloud-open-auth>☁️ Вход / Регистрация</button>
+                    <div data-cloud-actions hidden><button type="button" class="btn btn-secondary" data-cloud-logout>Выйти</button></div>
+                    <div data-cloud-details hidden>
+                        <button type="button" class="btn btn-secondary" data-cloud-bind hidden>Привязать и синхронизировать данные устройства</button>
+                        <div data-cloud-conflicts hidden><pre class="cloud-conflict-preview" data-cloud-conflict-preview></pre><p>Для спорных полей выбрать:</p><button type="button" class="btn btn-secondary" data-cloud-resolve="local">Версию устройства</button><button type="button" class="btn btn-secondary" data-cloud-resolve="remote">Версию облака</button></div>
+                    </div>
+                </section>
+                <div id="profileContent"></div>
+                <section class="ncd-about" aria-labelledby="ncdAboutTitle"><h4 id="ncdAboutTitle">О программе</h4><p><strong>NCD</strong><br>Note Carpe Diem</p></section>
+                <div class="form-group">
+                    <label>Тема оформления</label>
+                    <div class="theme-selector">
+                        <button class="theme-btn active" data-theme="light">☀️ Светлая</button>
+                        <button class="theme-btn" data-theme="dark">🌙 Тёмная</button>
+                        <button class="theme-btn" data-theme="auto">🔄 Авто</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Уведомления</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="notificationsEnabled" checked>
+                        <span class="toggle-slider"></span>
+                        <span>Уведомления Календаря</span>
+                    </label>
+                </div>
+                <div class="form-group" id="notificationSettingsGroup" style="display:none;">
+                    <label class="toggle" style="margin-top: 8px;">
+                        <input type="checkbox" id="calendarRemindersEnabled">
+                        <span class="toggle-slider"></span>
+                        <span>Напоминания о событиях календаря</span>
+                    </label>
+                    <label data-calendar-channel-option class="toggle" style="margin-top: 8px;">
+                        <input type="checkbox" id="notificationSoundEnabled" checked>
+                        <span class="toggle-slider"></span>
+                        <span>Звук</span>
+                    </label>
+                    <label data-calendar-channel-option class="toggle" style="margin-top: 8px;">
+                        <input type="checkbox" id="notificationVibrationEnabled" checked>
+                        <span class="toggle-slider"></span>
+                        <span>Вибрация</span>
+                    </label>
+                    <button type="button" class="btn btn-small" id="testNotificationBtn" style="margin-top: 12px;" hidden>🔔 Тест уведомления Календаря (3 сек)</button>
+                    <p class="form-hint" data-calendar-channel-hint hidden>Звук и вибрация задаются каналом «События Календаря» в настройках Android.</p>
+                    <p id="androidNotificationStatus" class="form-hint" role="status" hidden></p>
+                    <button type="button" class="btn btn-small" id="notificationExactPermissionBtn" hidden>Разрешить точное время</button>
+                </div>
+                <div class="form-group">
+                    <label>Установка приложения</label>
+                    <button class="btn btn-primary" id="installPwaBtn" style="display:none;">📱 Установить на главный экран</button>
+                    <p class="form-hint">Работает офлайн, открывается как нативное приложение без адресной строки.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="calendarActivitiesModal" role="dialog" aria-modal="true" aria-labelledby="calendarActivitiesTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="calendarActivitiesTitle">Все активности</h3><button type="button" class="btn-icon" id="closeCalendarActivitiesModal" aria-label="Закрыть список активностей">✕</button></div>
+            <div id="calendarMonthActivities" class="calendar-month-activities"></div>
+        </div>
+    </div>
+
+    <!-- Modal: PIN (код доступа) -->
+    <div class="modal" id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content pin-modal">
+            <div class="modal-header">
+                <h3 id="pinModalTitle">🔑 Код доступа</h3>
+                <button class="btn-icon" id="closePinModal">✕</button>
+            </div>
+            <p class="pin-subtitle">Введите код с ноутбука — он в консоли сервера,
+                в файле <code>pin.txt</code> или в Настройки → Синхронизация</p>
+            <form id="pinForm">
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" id="pinInput"
+                       class="pin-input" maxlength="8" placeholder="••••" autocomplete="one-time-code" required>
+                <p class="pin-error show" id="pinError">Введите код доступа, показанный на ноутбуке</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPinBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Подтвердить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="profileEditModal" role="dialog" aria-modal="true" aria-labelledby="profileEditTitle">
+        <div class="modal-overlay"></div><div class="modal-content">
+            <div class="modal-header"><h3 id="profileEditTitle">Редактировать профиль</h3><button type="button" class="btn-icon" id="closeProfileEditModal" aria-label="Закрыть">✕</button></div>
+            <form id="profileEditForm">
+                <p id="profileEditError" class="goal-form-error" role="alert" hidden></p>
+                <div class="form-group"><label for="profileNickname">Никнейм</label><input id="profileNickname" minlength="2" maxlength="32" required type="text" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text"></div>
+                <div class="form-group"><label for="profileStatus">Статус / девиз</label><textarea id="profileStatus" maxlength="120" rows="2"></textarea></div>
+                <div class="modal-actions"><button type="button" class="btn btn-secondary" id="cancelProfileEditBtn">Отмена</button><button type="submit" class="btn btn-primary">Сохранить</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal cloud-auth-modal ncd-auth" id="cloudAuthModal" role="dialog" aria-modal="true" aria-labelledby="cloudAuthTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content auth-shell">
+            <div class="auth-topbar"><button type="button" class="auth-back" data-auth-prev aria-label="Назад" hidden>←</button><span class="auth-wordmark">NCD</span><button type="button" class="auth-close" id="closeCloudAuthBtn" aria-label="Закрыть окно авторизации">×</button></div>
+            <div class="auth-body">
+                <div class="auth-hero"><div class="auth-emblem" aria-hidden="true"><svg class="ncd-compass" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><use href="assets/ncd-compass.svg#mark"></use></svg></div><ol class="auth-progress" data-auth-progress aria-label="Шаги авторизации"><li aria-current="step"><span class="sr-only">Email</span></li><li><span class="sr-only">Профиль</span></li><li><span class="sr-only">Пароль</span></li></ol></div>
+                <form data-cloud-auth novalidate>
+                    <h3 id="cloudAuthTitle">Ваша почта</h3><p class="auth-description" data-auth-description>Один аккаунт для ваших целей, заметок и планов.</p>
+                    <fieldset class="cloud-auth-mode"><legend class="sr-only">Действие</legend><label><input type="radio" name="mode" value="signin" checked><span>Войти</span></label><label><input type="radio" name="mode" value="signup"><span>Создать аккаунт</span></label></fieldset>
+                    <div data-auth-stage="email"><div class="form-group"><label for="cloudAuthEmail">Email</label><input id="cloudAuthEmail" name="email" type="email" required autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" aria-describedby="cloudAuthStatus"></div></div>
+                    <div data-auth-stage="profile" hidden><div class="form-group"><label for="cloudAuthNickname">Никнейм</label><div class="auth-handle"><span aria-hidden="true">@</span><input id="cloudAuthNickname" name="nickname" minlength="3" maxlength="32" placeholder="sayonara" pattern="[a-z][a-z0-9_]{2,31}" disabled aria-describedby="nicknameAvailability nicknameHint" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text"></div><p id="nicknameAvailability" data-nickname-status role="status" aria-live="polite"></p><small id="nicknameHint">3–32 символа: латинские буквы, цифры и _</small></div></div>
+                    <div data-auth-stage="password" data-cloud-password hidden><button type="button" class="auth-email" data-auth-edit-email></button><div class="form-group"><label for="cloudAuthPassword">Пароль</label><div class="auth-password"><input id="cloudAuthPassword" name="password" type="password" minlength="8" autocomplete="current-password" placeholder="Не менее 8 символов" disabled aria-describedby="cloudAuthStatus"><button type="button" data-auth-show-password aria-label="Показать пароль" aria-pressed="false">Показать</button></div></div></div>
+                    <div data-auth-stage="confirm" hidden><div class="auth-confirm-symbol" aria-hidden="true">↗</div><p class="auth-confirm-copy">Откройте письмо от NCD и подтвердите адрес. Подтвердите регистрацию, чтобы активировать аккаунт.</p></div>
+                    <button type="button" class="cloud-auth-link" data-cloud-forgot hidden>Забыли пароль?</button><button type="button" class="cloud-auth-link" data-cloud-back hidden>Вернуться ко входу</button>
+                    <p id="cloudAuthStatus" data-cloud-auth-status role="status" aria-live="polite"></p>
+                    <button type="submit" class="btn btn-primary btn-full auth-continue">Продолжить <span aria-hidden="true">→</span></button>
+                </form>
+            </div>
+            <p class="auth-footer">NCD <span>·</span> Note Carpe Diem</p>
+        </div>
+    </div>
+
+    <dialog id="achievementInspector" class="inspector-dialog achievement-inspector" aria-labelledby="achievementInspectorTitle">
+        <div class="inspector-dialog-header"><h3 id="achievementInspectorTitle">Достижение</h3><button type="button" class="btn-icon" id="closeAchievementInspector" aria-label="Закрыть детали достижения">×</button></div>
+        <div id="achievementInspectorBody"></div>
+    </dialog>
+
+    <div id="styleLoadError" role="alert">Не удалось загрузить оформление NCD. Проверьте подключение и обновите страницу. <button type="button" onclick="location.reload()">Обновить</button></div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="profile-storage.js"></script>
+    <script src="gamification.js"></script>
+    <script src="notifications.js"></script>
+    <script src="vendor/supabase/supabase.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="sync.js"></script>
+    <script src="auth_sync.js"></script>
+    <script src="finance.js"></script>
+    <script src="health.js"></script>
+    <script src="ui-select.js"></script>
+    <script src="ota-sync.js"></script>
+    <script src="achievements.js"></script>
+    <script src="workspace.js"></script>
+    <script src="case.js"></script>
+    <script src="learning.js"></script>
+    <script src="goals.js"></script>
+    <script src="ios-layout.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

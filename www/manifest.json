@@ -1,0 +1,88 @@
+{
+  "name": "NCD",
+  "short_name": "NCD",
+  "description": "NCD — цели, календарь, финансы и личная продуктивность. Работает офлайн.",
+  "id": "goaltracker-pro",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "background_color": "#000000",
+  "theme_color": "#3b82f6",
+  "orientation": "any",
+  "lang": "ru",
+  "categories": [
+    "productivity",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "icon-48.png?v=compass-1",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png?v=compass-1",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png?v=compass-1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192-maskable.png?v=compass-1",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512-maskable.png?v=compass-1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon.svg?v=compass-1",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Новая цель",
+      "short_name": "Цель",
+      "description": "Создать новую цель",
+      "url": "./index.html#goals",
+      "icons": [
+        {
+          "src": "icon-192.png?v=compass-1",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Календарь",
+      "short_name": "Календарь",
+      "description": "Открыть календарь",
+      "url": "./index.html#calendar",
+      "icons": [
+        {
+          "src": "icon-192.png?v=compass-1",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "version": "1.3.39"
+}

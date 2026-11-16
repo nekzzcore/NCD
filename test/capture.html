@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>Кадр виджета</title>
+<link rel="stylesheet" href="/styles.css">
+<style>body{margin:0;padding:16px;background:#0a0e17}</style>
+</head>
+<body>
+<!-- Страница-захват: рендерит виджет и выводит кадр как <img> (headless-скриншот его видит) -->
+<div class="card avatar-card" style="max-width:760px">
+    <div class="avatar-card-head">
+        <div>
+            <div class="widget-title" id="avatarCaption">Мой аватар</div>
+            <div class="widget-subtitle" id="avatarHint">assets/avatar.glb — замените на свою модель</div>
+        </div>
+        <div class="avatar-hud">
+            <span>Ур. <b id="avatarLevel">7</b></span>
+            <span><b id="avatarXp">640</b> XP</span>
+            <span>🔥 <b id="avatarStreak">12</b></span>
+            <span>🏅 <b id="avatarBadges">5</b></span>
+        </div>
+    </div>
+    <div class="avatar-stage" id="avatarStage" style="height:420px">
+        <canvas id="avatarCanvas"></canvas>
+    </div>
+</div>
+<script src="/avatar.js"></script>
+<script>
+// синхронно, сразу после avatar.js: виджет уже нарисовал первый кадр,
+// preserveDrawingBuffer сохраняет буфер — можно снять кадр как картинку
+(function () {
+    try {
+        const src = document.getElementById('avatarCanvas');
+        const img = new Image();
+        img.id = 'captured';
+        img.src = src.toDataURL('image/png');
+        img.style.cssText = 'width:100%;max-width:760px;border-radius:12px;display:block';
+        document.body.appendChild(img);
+        document.title = 'CAPTURED ' + img.src.length;
+    } catch (e) {
+        document.title = 'ERR ' + e.message;
+    }
+})();
+</script>
+</body></html>

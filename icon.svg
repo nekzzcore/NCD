@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><title>Звезда-компас</title><rect width="512" height="512" fill="#000000" /><g transform="translate(30.72 30.72) scale(4.5056)" color="#ffffff"><g stroke="currentColor" stroke-width="1" stroke-linejoin="miter">
+    <g>
+      <path d="M77 23 62 44 56 44Z" fill="currentColor" />
+      <path d="M77 23 56 38 56 44Z" fill="none" />
+    </g>
+    <g transform="rotate(90 50 50)">
+      <path d="M77 23 62 44 56 44Z" fill="currentColor" />
+      <path d="M77 23 56 38 56 44Z" fill="none" />
+    </g>
+    <g transform="rotate(180 50 50)">
+      <path d="M77 23 62 44 56 44Z" fill="currentColor" />
+      <path d="M77 23 56 38 56 44Z" fill="none" />
+    </g>
+    <g transform="rotate(270 50 50)">
+      <path d="M77 23 62 44 56 44Z" fill="currentColor" />
+      <path d="M77 23 56 38 56 44Z" fill="none" />
+    </g>
+    <g>
+      <path d="M50 2 56 44 50 50Z" fill="currentColor" />
+      <path d="M50 2 44 44 50 50Z" fill="none" />
+    </g>
+    <g transform="rotate(90 50 50)">
+      <path d="M50 2 56 44 50 50Z" fill="currentColor" />
+      <path d="M50 2 44 44 50 50Z" fill="none" />
+    </g>
+    <g transform="rotate(180 50 50)">
+      <path d="M50 2 56 44 50 50Z" fill="currentColor" />
+      <path d="M50 2 44 44 50 50Z" fill="none" />
+    </g>
+    <g transform="rotate(270 50 50)">
+      <path d="M50 2 56 44 50 50Z" fill="currentColor" />
+      <path d="M50 2 44 44 50 50Z" fill="none" />
+    </g>
+  </g>
+</g></svg>

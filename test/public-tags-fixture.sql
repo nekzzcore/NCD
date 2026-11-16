@@ -1,0 +1,23 @@
+-- Local disposable PostgreSQL ONLY. No real credentials or email addresses.
+create role anon nologin;
+create role authenticated nologin;
+create schema auth;
+grant usage on schema auth to anon,authenticated;
+create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+create table public.profiles(user_id uuid primary key references auth.users(id),nickname text not null default '',revision bigint not null default 0,last_request uuid,extra jsonb not null default '{}',updated_at timestamptz not null default now());
+alter table public.profiles enable row level security;
+alter table public.profiles force row level security;
+create policy "Users can manage own profile" on public.profiles for all to authenticated using(auth.uid()=user_id) with check(auth.uid()=user_id);
+grant select,insert,update on public.profiles to authenticated;
+create table public.user_profile(user_id uuid primary key references auth.users(id),data jsonb not null default '{}');
+alter table public.user_profile enable row level security;
+create policy owner_profile on public.user_profile for all to authenticated using(auth.uid()=user_id) with check(auth.uid()=user_id);
+grant select,insert,update on public.user_profile to authenticated;
+create table public.goals(user_id uuid primary key references auth.users(id),data jsonb not null default '[]');
+alter table public.goals enable row level security;
+create policy owner_goals on public.goals for all to authenticated using(auth.uid()=user_id) with check(auth.uid()=user_id);
+grant select,insert,update on public.goals to authenticated;
+insert into auth.users(id,email_confirmed_at) values('10000000-0000-4000-8000-000000000001',now()),('10000000-0000-4000-8000-000000000002',now()),('10000000-0000-4000-8000-000000000003',now());
+insert into public.profiles(user_id,nickname) select id,'Private nickname' from auth.users;
+insert into public.user_profile(user_id,data) select id,'{"customAvatarData":"private-avatar"}' from auth.users;

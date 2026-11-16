@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NCD</string>
+    <string name="title_activity_main">NCD</string>
+    <string name="package_name">com.sayonara.goaltracker</string>
+    <string name="custom_url_scheme">com.sayonara.goaltracker</string>
+</resources>

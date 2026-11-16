@@ -1,0 +1,21 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path');const {JSDOM,VirtualConsole}=require('jsdom');
+const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+for(const width of [1440,375])test(`Compact profile at ${width}px: avatar/nickname editing remains, alias UI absent`,t=>{
+ const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(String(e)));vc.on('error',(...args)=>errors.push(args.join(' ')));
+ const dom=new JSDOM(html,{url:'https://compact.invalid',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc});const w=dom.window,d=w.document;
+ t.after(()=>{assert.deepEqual(errors,[]);w.close();});Object.defineProperty(w,'innerWidth',{value:width});
+ w.eval(fs.readFileSync(path.join(root,'app.js'),'utf8').split('// ===== Initialize =====')[0]+'\nwindow.GoalTracker=GoalTracker;');
+ const app=Object.create(w.GoalTracker.prototype);const user={id:'local',nickname:'Мой ник',status:'Сохранённый статус',createdAt:'2026-01-01'};
+ Object.assign(app,{user,goals:[],achievements:[],getCustomAvatar:()=>'',renderCategoryStats(){},renderWeeklyActivity(){}});app.renderProfile();
+ const header=d.querySelector('.profile-header');assert.equal(header.querySelector('h2').textContent,'Мой ник');
+ assert.ok(header.querySelector('#chooseProfileAvatar'));assert.ok(header.querySelector('#profileAvatarFile'));assert.ok(header.querySelector('#editProfileBtn'));
+ assert.equal(header.querySelectorAll('.profile-info > *').length,2);
+ assert.equal(header.querySelector('#settingsPlayerTag'),null);
+ assert.equal(d.querySelector('[data-public-tag-panel],[data-public-alias-line],[data-public-nickname]'),null);
+ assert.doesNotMatch(header.textContent,/псевдоним|копировать|обновить|видимость/i);
+ assert.deepEqual(app.user,user);assert.equal(user.status,'Сохранённый статус');
+ assert.doesNotMatch(html,/src="public-tags.js"/);
+ const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');require('css-tree').parse(css);
+ if(width<480)assert.match(css,/@media \(max-width: 480px\) \{\s*\.profile-header \{[^}]*flex-direction: row/s);
+});

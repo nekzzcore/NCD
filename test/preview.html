@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Превью — 3D-аватар</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body { padding: 24px; max-width: 760px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <!-- Копия виджета из index.html для визуальной проверки -->
+    <div class="card avatar-card">
+        <div class="avatar-card-head">
+            <div>
+                <div class="widget-title" id="avatarCaption">Мой аватар</div>
+                <div class="widget-subtitle" id="avatarHint">assets/avatar.glb — замените на свою модель</div>
+            </div>
+            <div class="avatar-hud">
+                <span>Ур. <b id="avatarLevel">–</b></span>
+                <span><b id="avatarXp">0</b> XP</span>
+                <span>🔥 <b id="avatarStreak">0</b></span>
+                <span>🏅 <b id="avatarBadges">0</b></span>
+            </div>
+        </div>
+        <div class="avatar-stage" id="avatarStage">
+            <canvas id="avatarCanvas"></canvas>
+            <div class="avatar-fallback-emoji">🧍</div>
+        </div>
+    </div>
+    <script src="/avatar.js"></script>
+    <script>
+        // имитация app.js: показать HUD
+        setTimeout(() => window.avatarWidget && window.avatarWidget.update({
+            nickname: 'Сайонара', level: 7, xp: 640, streak: 12, badges: 5
+        }), 300);
+    </script>
+</body>
+</html>
